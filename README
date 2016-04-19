@@ -1,0 +1,38 @@
+libshalloc
+----------
+  by Uladox
+
+This is a library build around making shared memory simple, clean, and fun.
+It does by providing a small static library that provides probably 99% of what
+you would want to use shared memory for in a style similar to the c standard 
+library. I have tried to follow the guidelines of suckless.org by looking at 
+their libutf.
+
+It is named libshalloc after the function shalloc which provides malloc-like
+functionality, except for shared memory. There is also support for a model of
+concurrency which is really simple: only have one reference to the memory at a
+time (no complicated actor model, functional computation, or mutexs needed).
+This is done with the shapass and shacatch functions to "pass" the reference to
+another program. Finally when the memory needs to be free, it can be sent to
+shafree which just frees it.
+
+All passing and catching functions have a "specific file" form (like fprintf) 
+and a plain text form (by default it's binary) represented by prefixing the 
+normal name of the function with a "f" and postfixing it with "_pt"
+respectively. You can also combine the two which could be useful.
+
+All functions returning a pointer can have errors, and in which case, they
+return NULL.
+
+A good use of shared memory in this fashion is making a replacement for some of
+the features of shared libraries (some people really do not like them) in terms
+of adding new functionability to a program at run time. This could be done with
+a jit like program or a byte code interpreter which is entirely separate from 
+the program its outputting for, which is a win for the "do only one thing, but
+do it well" principal.
+
+Also sharing memory in this fashion allows it to transcend past the program it
+was spawned in and live long after the program has died as part of another
+program. I see this as a major benefit to making more programs that can be
+indefinitely extended at run-time in a quick and elegant way. A flow of
+information capable of gradual evolution.
