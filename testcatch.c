@@ -7,4 +7,5 @@ int main(void)
 
 	printf("%s", str);
 	shafree(str);
+	return 0;
 }

@@ -1,5 +1,6 @@
 /* See LICENSE file for copyright and license details. */
 #include <sys/shm.h>
+#include <sys/mman.h>
 #include "shalloc.h"
 
 void *
@@ -114,4 +115,26 @@ fshacatch_pt(FILE *stream)
 	if (fscanf(stream, "%i", &id) < 0 || id < 0)
 		return NULL;
 	return shaptrtoptr(id);
+}
+
+void
+shasetexec(void *p)
+{
+	struct shmid_ds shmbuff;
+	Shaptr *s = p;
+
+	shmctl(*--s, IPC_STAT, &shmbuff);
+	mprotect(s, shmbuff.shm_segsz, PROT_EXEC | PROT_READ);
+	/* shmbuff.shm_perm.mode = 0777; */
+	/* shmctl(id, IPC_SET, &shmbuff); */
+}
+
+void
+shaunsetexec(void *p)
+{
+	struct shmid_ds shmbuff;
+	Shaptr *s = p;
+
+	shmctl(*--s, IPC_STAT, &shmbuff);
+	mprotect(s, shmbuff.shm_segsz, PROT_WRITE | PROT_READ);
 }

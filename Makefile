@@ -19,6 +19,8 @@ testpass: testpass.o $(LIB)
 testcatch: testcatch.o $(LIB)
 	$(CC) -o $@ testcatch.o $(LIB)
 
+testexec: testexec.o $(LIB)
+	$(CC) -o $@ testexec.o $(LIB)
 .c.o:
 	$(CC) $(CFLAGS) -c $<
 
@@ -34,10 +36,11 @@ uninstall:
 	@rm -f $(DESTDIR)$(PREFIX)/lib/$(LIB)
 	@rm -f $(DESTDIR)$(PREFIX)/include/$(INC)
 
-test: testpass testcatch
+test: testpass testcatch testexec
 	./testpass | ./testcatch
+	./testexec 42
 
 clean:
-	rm -f $(LIB) testpass testcatch shalloctest.o $(OBJ)
+	rm -f $(LIB) testpass testcatch testexec *.o
 
 .PHONY: install uninstall test clean

@@ -3,17 +3,18 @@
 
 #define HELLO "hello, world!\n"
 
-int main(int argv, char *args[])
+int main(int argc, char *argv[])
 {
 	char *str;
 
-	if (argv > 1) {
-		str = shalloc(strlen(args[1]) + 1);
-		sprintf(str, "%s\n", args[1]);
+	if (argc > 1) {
+		str = shalloc(strlen(argv[1]) + 1);
+		sprintf(str, "%s\n", argv[1]);
 	} else {
 		str = shalloc(sizeof(HELLO));
 		sprintf(str, HELLO);
 	}
 
         shapass(str);
+	return 0;
 }

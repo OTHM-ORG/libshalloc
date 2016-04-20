@@ -2,6 +2,6 @@
 
 PREFIX = /usr/local
 
-CFLAGS = -std=c99 -pedantic -D_XOPEN_SOURCE=700 -Os -Wall -Wextra
+CFLAGS = -ansi -pedantic -D_XOPEN_SOURCE=700 -Os -Wall -Wextra
 
 CC = cc

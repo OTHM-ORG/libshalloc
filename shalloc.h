@@ -22,4 +22,7 @@ void *shacatch_pt(void);
 void *fshacatch(FILE *stream);
 void *fshacatch_pt(FILE *stream);
 
+void shasetexec(void *p);
+void shaunsetexec(void *p);
+
 #endif
