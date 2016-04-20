@@ -1,0 +1,28 @@
+.Dd $Mdocdate$
+.Dt SHALLOC 3
+.Os
+.Sh NAME
+.Nm shalloc, shafree
+.Nd shared memory allocation and freeing
+.Sh SYNOPSIS
+.In shalloc.h
+.Ft void *
+.Fn shalloc "size_t size"
+.Ft void
+.Fn shafree "void *p"
+.Sh DESCRIPTION
+The following functions allocate shared memory in a fashion similar to malloc and free them in a fashion similar to free.
+.Pp
+.Fn shalloc
+allocates a block of shared memory of size 
+.Fa size
+that has read and write access.
+If there is no error, a pointer to the block is returned.
+If there is an error, NULL is returned.
+.Pp
+.Fn shafree
+frees the shared memory pointed to by
+.Fa p
+similarly to the standard library free.
+.Sh SEE ALSO
+.Xr free 3

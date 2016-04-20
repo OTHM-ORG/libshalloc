@@ -1,6 +1,5 @@
 /* See LICENSE file for copyright and license details. */
 #include <sys/shm.h>
-#include <sys/stat.h>
 #include "shalloc.h"
 
 void *
