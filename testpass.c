@@ -5,7 +5,7 @@
 
 int main(int argv, char *args[])
 {
-	char *restrict str;
+	char *str;
 
 	if (argv > 1) {
 		str = shalloc(strlen(args[1]) + 1);
@@ -15,6 +15,5 @@ int main(int argv, char *args[])
 		sprintf(str, HELLO);
 	}
 
-	printf(str);
-	shafree(str);
+        shapass(str);
 }

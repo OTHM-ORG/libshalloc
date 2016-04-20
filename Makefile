@@ -13,8 +13,11 @@ all: $(LIB)
 $(LIB): $(OBJ)
 	$(AR) -rcs $@ $(OBJ)
 
-shalloctest: shalloctest.o $(LIB)
-	$(CC) -o $@ shalloctest.o $(LIB)
+testpass: testpass.o $(LIB)
+	$(CC) -o $@ testpass.o $(LIB)
+
+testcatch: testcatch.o $(LIB)
+	$(CC) -o $@ testcatch.o $(LIB)
 
 .c.o:
 	$(CC) $(CFLAGS) -c $<
@@ -31,5 +34,10 @@ uninstall:
 	@rm -f $(DESTDIR)$(PREFIX)/lib/$(LIB)
 	@rm -f $(DESTDIR)$(PREFIX)/include/$(INC)
 
+test: testpass testcatch
+	./testpass | ./testcatch
+
 clean:
-	rm -f $(LIB) shalloctest shalloctest.o $(OBJ)
+	rm -f $(LIB) testpass testcatch shalloctest.o $(OBJ)
+
+.PHONY: install uninstall test clean

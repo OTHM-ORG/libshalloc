@@ -4,88 +4,115 @@
 #include "shalloc.h"
 
 void *
+shaptrtoptr(Shaptr id)
+{
+	return (Shaptr *) shmat(id, NULL, 0) + 1;
+}
+
+Shaptr
+ptrtoshaptr(void *p)
+{
+	return *((Shaptr *) p - 1);
+}
+
+void *
 shalloc(size_t size)
 {
-	int *mem;
-	int id = shmget(IPC_PRIVATE, size + sizeof(id),
-			IPC_CREAT | IPC_EXCL | 0666);
+	Shaptr *p;
+	Shaptr id = shmget(IPC_PRIVATE, size + sizeof(id),
+			   IPC_CREAT | IPC_EXCL | 0666);
 
 	if (id < 0)
 		return NULL;
-	*(mem = shmat(id, NULL, 0)) = id;
-	return mem + 1;
+	*(p = shmat(id, NULL, 0)) = id;
+	return p + 1;
 }
 
 void
-shafree(void *restrict mem)
+shafree(void *p)
 {
-	mem = ((int *) mem) - 1;
-	shmctl(*(int *) mem, IPC_RMID, NULL);
-	shmdt(mem);
+	Shaptr *s = p;
+
+	shmctl(*--s, IPC_RMID, NULL);
+	shmdt(s);
+}
+
+Shaptr
+shaflick(void *p)
+{
+	Shaptr *s = p;
+	Shaptr id = *--s;
+
+	shmdt(s);
+	return id;
 }
 
 void
-shapass(void *restrict mem)
+shapass(void *p)
 {
-	mem = ((int *) mem) - 1;
-	fwrite(mem, sizeof(int), 1, stdout);
-	shmdt(mem);
+	Shaptr id = shaflick(p);
+
+	fwrite(&id, sizeof(Shaptr), 1, stdout);
 }
 
 void
-shapass_pt(void *restrict mem)
+fshapass(void *p, FILE *stream)
 {
-	mem = ((int *) mem) - 1;
-	printf("%i\n", *(int *) mem);
-	shmdt(mem);
+	Shaptr id = shaflick(p);
+
+	fwrite(&id, sizeof(Shaptr), 1, stream);
 }
 
 void
-fshapass_pt(void *restrict mem, FILE *stream)
+shapass_pt(void *p)
 {
-	mem = ((int *) mem) - 1;
-	fprintf(stream, "%i\n", *(int *) mem);
-	shmdt(mem);
+	printf("%i\n", shaflick(p));
+}
+
+void
+fshapass_pt(void *p, FILE *stream)
+{
+	fprintf(stream, "%i\n", shaflick(p));
 }
 
 void *
 shacatch(void)
 {
-	int id;
+	Shaptr id;
 
-	fread(&id, sizeof(int), 1, stdin);
+	fread(&id, sizeof(id), 1, stdin);
 	if (id < 0)
 		return NULL;
-	return shmat(id, NULL, 0);
+	return shaptrtoptr(id);
 }
 
 void *
 shacatch_pt(void)
 {
-	int id;
+	Shaptr id;
 
 	if (scanf("%i", &id) < 0 || id < 0)
 		return NULL;
-	return shmat(id, NULL, 0);
+	return shaptrtoptr(id);
 }
 
 void *
 fshacatch(FILE *stream)
 {
-	int id;
+	Shaptr id;
 
-	fread(&id, sizeof(int), 1, stream);
+	fread(&id, sizeof(id), 1, stream);
 	if (id < 0)
 		return NULL;
-	return shmat(id, NULL, 0);
+	return shaptrtoptr(id);
 }
 
 void *
 fshacatch_pt(FILE *stream)
 {
-	int id;
+	Shaptr id;
 
 	if (fscanf(stream, "%i", &id) < 0 || id < 0)
 		return NULL;
-	return shmat(id, NULL, 0);
+	return shaptrtoptr(id);
 }

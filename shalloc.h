@@ -3,12 +3,20 @@
 
 #include <stdio.h>
 
-void *shalloc(size_t size);
-void shafree(void *restrict mem);
+typedef int Shaptr;
 
-void shapass(void *restrict mem);
-void shapass_pt(void *restrict mem);
-void fshapass_pt(void *restrict mem, FILE *stream);
+void *shaptrtoptr(Shaptr id);
+Shaptr ptrtoshaptr(void *p);
+
+void *shalloc(size_t size);
+void shafree(void *p);
+
+Shaptr shaflick(void *p);
+void shapass(void *p);
+void fshapass(void *p, FILE *stream);
+void shapass_pt(void *p);
+void fshapass_pt(void *p, FILE *stream);
+
 void *shacatch(void);
 void *shacatch_pt(void);
 void *fshacatch(FILE *stream);
