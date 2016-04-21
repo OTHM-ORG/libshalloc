@@ -5,31 +5,41 @@
 
 #include "shalloc.h"
 
-int main(int argc, char *argv[])
+void send_exec(int num)
 {
-	int num;
 	void *mem;
-	int (*func)(void);
 	unsigned char code[] = { 0xb8, /* mov eax, */
 				 0x00, 0x00, 0x00, 0x00, /* 0 */
 				 0xc3 /* ret */ };
 
-	if (argc < 2) {
-		fprintf(stderr, "Usage: testexec <int>\n");
-		return 1;
-	}
-
-	num = atoi(argv[1]);
 	memcpy(&code[1], &num, 4);
 
         mem = shalloc(sizeof(code));
 	memcpy(mem, code, sizeof(code));
-	shasetexec(mem);
 
-	func = mem;
+	shapass_pt(mem);
+
+}
+
+void get_exec(void)
+{
+	int (*func)(void) = shacatch_pt();
+
+	shasetexec(func);
 	printf("Your number was %i\n", func());
+	shafree(func);
+}
 
-	shafree(mem);
+
+
+int main(int argc, char *argv[])
+{
+	int num;
+
+	if (argc < 2)
+		get_exec();
+	else
+		send_exec(atoi(argv[1]));
 
 	return 0;
 }

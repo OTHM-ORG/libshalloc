@@ -38,7 +38,7 @@ uninstall:
 
 test: testpass testcatch testexec
 	./testpass | ./testcatch
-	./testexec 42
+	./testexec 42 | ./testexec
 
 clean:
 	rm -f $(LIB) testpass testcatch testexec *.o
