@@ -1,19 +1,11 @@
 /* See LICENSE file for copyright and license details. */
-#include <sys/shm.h>
 #include <sys/mman.h>
+#include <sys/shm.h>
+#include <unistd.h>
+
 #include "shalloc.h"
 
-void *
-shaptrtoptr(Shaptr id)
-{
-	return (Shaptr *) shmat(id, NULL, 0) + 1;
-}
-
-Shaptr
-ptrtoshaptr(void *p)
-{
-	return *((Shaptr *) p - 1);
-}
+/* Allocating & freeing */
 
 void *
 shalloc(size_t size)
@@ -36,6 +28,86 @@ shafree(void *p)
 	shmctl(*--s, IPC_RMID, NULL);
 	shmdt(s);
 }
+
+/* Converting */
+
+void *
+shaptrtoptr(Shaptr id)
+{
+	return (Shaptr *) shmat(id, NULL, 0) + 1;
+}
+
+Shaptr
+ptrtoshaptr(void *p)
+{
+	return *((Shaptr *) p - 1);
+}
+
+
+/* Getting info */
+
+int shamine(void *p)
+{
+	struct shmid_ds shmbuff;
+	pid_t this = getpid();
+
+	shmctl(ptrtoshaptr(p), IPC_STAT, &shmbuff);
+	return shmbuff.shm_lpid == this;
+}
+
+/* Permission set */
+
+void
+shasetexec(void *p)
+{
+	struct shmid_ds shmbuff;
+	Shaptr *s = p;
+
+	shmctl(*--s, IPC_STAT, &shmbuff);
+	mprotect(s, shmbuff.shm_segsz, PROT_EXEC | PROT_READ);
+}
+
+void
+shaunsetexec(void *p)
+{
+	struct shmid_ds shmbuff;
+	Shaptr *s = p;
+
+	shmctl(*--s, IPC_STAT, &shmbuff);
+	mprotect(s, shmbuff.shm_segsz, PROT_WRITE | PROT_READ);
+}
+
+/* Lending */
+
+void
+shalend(void *p)
+{
+	Shaptr id = ptrtoshaptr(p);
+
+	fwrite(&id, sizeof(Shaptr), 1, stdout);
+}
+
+void
+fshalend(void *p, FILE *stream)
+{
+	Shaptr id = ptrtoshaptr(p);
+
+	fwrite(&id, sizeof(Shaptr), 1, stream);
+}
+
+void
+shalend_pt(void *p)
+{
+	printf("%i\n", ptrtoshaptr(p));
+}
+
+void
+fshalend_pt(void *p, FILE *stream)
+{
+	fprintf(stream, "%i\n", ptrtoshaptr(p));
+}
+
+/* Passing */
 
 Shaptr
 shaflick(void *p)
@@ -74,6 +146,17 @@ fshapass_pt(void *p, FILE *stream)
 {
 	fprintf(stream, "%i\n", shaflick(p));
 }
+
+/* Returning control */
+
+void
+shareturn(void *p)
+{
+	shmdt((Shaptr *) p - 1);
+}
+
+
+/* Catch */
 
 void *
 shacatch(void)
@@ -115,26 +198,4 @@ fshacatch_pt(FILE *stream)
 	if (fscanf(stream, "%i", &id) < 0 || id < 0)
 		return NULL;
 	return shaptrtoptr(id);
-}
-
-void
-shasetexec(void *p)
-{
-	struct shmid_ds shmbuff;
-	Shaptr *s = p;
-
-	shmctl(*--s, IPC_STAT, &shmbuff);
-	mprotect(s, shmbuff.shm_segsz, PROT_EXEC | PROT_READ);
-	/* shmbuff.shm_perm.mode = 0777; */
-	/* shmctl(id, IPC_SET, &shmbuff); */
-}
-
-void
-shaunsetexec(void *p)
-{
-	struct shmid_ds shmbuff;
-	Shaptr *s = p;
-
-	shmctl(*--s, IPC_STAT, &shmbuff);
-	mprotect(s, shmbuff.shm_segsz, PROT_WRITE | PROT_READ);
 }

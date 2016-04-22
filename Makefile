@@ -36,8 +36,10 @@ uninstall:
 	@rm -f $(DESTDIR)$(PREFIX)/lib/$(LIB)
 	@rm -f $(DESTDIR)$(PREFIX)/include/$(INC)
 
-test: testpass testcatch testexec
+test-pass: testpass testcatch
 	./testpass | ./testcatch
+
+test-exec: testexec
 	./testexec 42 | ./testexec
 
 clean:

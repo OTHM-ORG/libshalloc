@@ -34,8 +34,6 @@ void get_exec(void)
 
 int main(int argc, char *argv[])
 {
-	int num;
-
 	if (argc < 2)
 		get_exec();
 	else
